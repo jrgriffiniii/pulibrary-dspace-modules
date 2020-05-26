@@ -1,4 +1,5 @@
 # Extension Modules for DSpace 5.3
+[![CircleCI](https://circleci.com/gh/jrgriffiniii/pulibrary-dspace-modules.svg?style=svg)](https://circleci.com/gh/jrgriffiniii/pulibrary-dspace-modules)
 
 Extension modules for DSpace 5.3 releases.
 
