@@ -1,0 +1,57 @@
+version: 2.1
+
+jobs:
+  build:
+    working_directory: ~/pulibrary-dspace-modules
+
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+      - image: postgres:9.0
+        environment:
+          POSTGRES_USER: dspace
+          POSTGRES_PASSWORD: dspace
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: circleci-pulibrary-dspace-modules-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline
+      - run:
+          name: Generate the DSpace test harness
+          command: mvn generate-test-resources
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/pulibrary-dspace-modules/target
+          key: circleci-pulibrary-dspace-modules-{{ checksum "pom.xml" }}
+      - run: mvn verify test
+      - store_test_results:
+          path: target/surefire-reports
+      - store_artifacts:
+          path: target/site/jacoco
+
+  reporting:
+    working_directory: ~/pulibrary-dspace-modules
+
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: circleci-pulibrary-dspace-modules-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/pulibrary-dspace-modules/target
+          key: circleci-pulibrary-dspace-modules-{{ checksum "pom.xml" }}
+      - run: mvn site
+      - store_artifacts:
+          path: target/site
+
+workflows:
+  maven_test:
+    jobs:
+      - build
+      - reporting
